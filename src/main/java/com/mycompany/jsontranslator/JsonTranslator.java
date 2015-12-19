@@ -55,7 +55,7 @@ public class JsonTranslator {
        StringBuffer sBuffer1 = new StringBuffer(toDate);
        String yearTo = sBuffer1.substring(0,3);
        String monTo = sBuffer1.substring(5,6);
-       String ddTo = sBuffer1.substring(8,9);
+       String ddTo = sBuffer1.substring(7,8);
        int intYearTo = Integer.parseInt(yearTo);
        int intMonTo = Integer.parseInt(monTo);
        int intDdTo = Integer.parseInt(ddTo);
@@ -71,7 +71,7 @@ public class JsonTranslator {
    //This method is called by the above method numberOfDays
    public static int daysBetween(Date d1, Date d2)
    {
-      return (int)( (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24));
+      return (int)( (d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
    }
     
     public static ConnectionFactory getConnection() {
@@ -83,13 +83,13 @@ public class JsonTranslator {
         return factory;
     }
 
-    public static JSONObject getJSON(String ssn, String creditScore, String loanAmount, String loanDuration) throws ParserConfigurationException, SAXException, IOException, JSONException {
-        JSONObject json = new JSONObject();
-        json.put("ssn", ssn);
-        json.put("creditScore", creditScore);
-        json.put("loanAmount", loanAmount);
-        json.put("loanDuration", numberOfDays(loanDuration));
-
+    public static String getJSON(String ssn, String creditScore, String loanAmount, String loanDuration) throws ParserConfigurationException, SAXException, IOException, JSONException {
+//        JSONObject json = new JSONObject();
+//        json.put("ssn", ssn);
+//        json.put("creditScore", creditScore);
+//        json.put("loanAmount", loanAmount);
+//        json.put("loanDuration", numberOfDays(loanDuration));
+        String json = "{\"ssn\":"+ssn+",\"creditScore\":"+creditScore+",\"loanAmount\":"+loanAmount+",\"loanDuration\":"+numberOfDays(loanDuration)+"}";
         return json;
     }
 
@@ -108,7 +108,7 @@ public class JsonTranslator {
                     throws IOException {
                 String message = new String(body, "UTF-8");
                 System.out.println(" [x] Received '" + message + "'");
-                JSONObject json = null;
+                String json = null;
                 try {
                     String[]parts = message.split(">>>");
                     json = getJSON(parts[0], parts[3], parts[1], parts[2]);
@@ -125,7 +125,7 @@ public class JsonTranslator {
                 Channel channel2 = connection2.createChannel();
                 channel2.exchangeDeclare(EXCHANGE_NAME, "fanout");
 
-                channel2.basicPublish(EXCHANGE_NAME, "", replyChannel.build(), json.toString().getBytes());
+                channel2.basicPublish(EXCHANGE_NAME, "", replyChannel.build(), json.getBytes());
                 System.out.println(" [x] Sent '" + json.toString() + "'");
                 channel2.close();
                 connection2.close();
